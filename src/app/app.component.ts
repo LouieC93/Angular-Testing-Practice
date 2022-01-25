@@ -1,5 +1,11 @@
 import { Component } from '@angular/core';
-import { ValidationErrors } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -7,43 +13,42 @@ import { ValidationErrors } from '@angular/forms';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  account = '123';
-  pwd = 'abc';
-  accountErrorMsg = '';
-  pwdErrorMsg = '';
+  formGroup: FormGroup;
 
-  accountValueChange(acc: string, error: ValidationErrors | null) {
-    this.account = acc;
-    this.runValid(error, 'account');
+  constructor(private fb: FormBuilder) {}
+
+  ngOnInit(): void {
+    this.initForm();
   }
 
-  pwdValueChange(pwd: string, error: ValidationErrors | null) {
-    this.pwd = pwd;
-    this.runValid(error, 'pwd');
+  private initForm() {
+    this.formGroup = this.fb.group({
+      acc: [
+        'enter account',
+        [Validators.required, Validators.pattern(/^\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b$/gi)],
+      ],
+      pwd: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(16)]],
+    });
   }
 
-  private runValid(error: ValidationErrors | null, controlName: 'account' | 'pwd') {
+  getControl(name: 'acc' | 'pwd'): FormControl {
+    return this.formGroup.get(name) as FormControl;
+  }
+
+  getErrorMsg(control: FormControl) {
     let msg = '';
-    if (!error) {
+    if (!control.errors || control.pristine) {
       msg = '';
-    } else if (error['required']) {
+    } else if (control.errors['required']) {
       msg = 'this is required!';
-    } else if (error['pattern']) {
+    } else if (control.errors['pattern']) {
       msg = 'pattern error!';
-    } else if (error['minlength']) {
-      msg = 'minlength 8!';
-    } else {
-      msg = 'unknown error!';
+    } else if (control.errors['minlength']) {
+      msg = 'minlenth 8!';
+    } else if (control.errors['maxlength']) {
+      msg = 'maxlength 16!';
     }
-    this.setErrorMsg(controlName, msg);
-  }
-
-  private setErrorMsg(controlName: 'account' | 'pwd', errorMsg: string) {
-    if (controlName === 'account') {
-      this.accountErrorMsg = errorMsg;
-    } else {
-      this.pwdErrorMsg = errorMsg;
-    }
+    return msg;
   }
 
   log(...param: any[]) {

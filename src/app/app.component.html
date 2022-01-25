@@ -1,32 +1,15 @@
-<form #form="ngForm" (ngSubmit)="log(form, accModel, pwdModel)">
+<form [formGroup]="formGroup" (ngSubmit)="log(formGroup)">
   <p>
     <label for="account">帳號：</label>
-    <input
-      type="email"
-      name="account"
-      id="account"
-      required
-      pattern="\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b"
-      #accModel="ngModel"
-      [ngModel]="account"
-      (ngModelChange)="accountValueChange(accModel.value, accModel.errors)" />
+    <input type="email" name="account" id="account" formControlName="acc" />
     <br />
-    <span class="error-msg">{{ accountErrorMsg }}</span>
+    <span class="error-msg">{{ getErrorMsg(getControl('acc')) }}</span>
   </p>
   <p>
     <label for="password">密碼：</label>
-    <input
-      type="password"
-      name="password"
-      id="password"
-      required
-      #pwdModel="ngModel"
-      minlength="8"
-      maxlength="16"
-      (ngModelChange)="pwdValueChange(pwdModel.value, pwdModel.errors)"
-      [ngModel]="pwd" />
+    <input type="password" name="password" id="password" formControlName="pwd" />
     <br />
-    <span class="error-msg">{{ pwdErrorMsg }}</span>
+    <span class="error-msg">{{ getErrorMsg(getControl('pwd')) }}</span>
   </p>
   <p>
     <button type="submit">登入</button>
