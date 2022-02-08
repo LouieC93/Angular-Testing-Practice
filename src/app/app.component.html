@@ -1,5 +1,5 @@
 <form #form="ngForm" (ngSubmit)="log(form, accModel, pwdModel)">
-  <p>
+  <p id="acc-wrap">
     <label for="account">帳號：</label>
     <input
       type="email"
@@ -13,7 +13,7 @@
     <br />
     <span class="error-msg">{{ accountErrorMsg }}</span>
   </p>
-  <p>
+  <p id="pwd-wrap">
     <label for="password">密碼：</label>
     <input
       type="password"
@@ -29,6 +29,6 @@
     <span class="error-msg">{{ pwdErrorMsg }}</span>
   </p>
   <p>
-    <button type="submit">登入</button>
+    <button type="submit" [disabled]="form.invalid">登入</button>
   </p>
 </form>

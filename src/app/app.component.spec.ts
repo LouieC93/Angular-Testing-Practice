@@ -19,38 +19,178 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  describe('function accountValueChange', () => {
-    it('should set value into property "account"', () => {
-      const acc = 'aa@aa.com';
-      const err = null;
-      app.accountValueChange(acc, err);
-      expect(app.account).toBe(acc);
+  describe('Unit Testing', () => {
+    describe('function accountValueChange', () => {
+      it('should set value into property "account"', () => {
+        const acc = 'aa@aa.com';
+        const err = null;
+        app.accountValueChange(acc, err);
+        expect(app.account).toBe(acc);
+      });
+      it('should set error msg "this is required!" into property "accountError" when enter empty string', () => {
+        const acc = '';
+        const error = { required: true };
+        const msg = 'this is required!';
+        app.accountValueChange(acc, error);
+        expect(app.accountErrorMsg).toBe(msg);
+      });
+      it('should set error msg "pattern error!" into property "accountError" when enter invalid string', () => {
+        const acc = 'aaaa1111';
+        const error = {
+          pattern: {
+            actualValue: acc,
+            requiredpattern: '^\\b[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,4}\\b$',
+          },
+        };
+        const msg = 'pattern error!';
+        app.accountValueChange(acc, error);
+        expect(app.accountErrorMsg).toBe(msg);
+      });
+      it('should set error msg "" into property "accountError" when enter correct string', () => {
+        const acc = 'aaaa1111@bbb.com';
+        const error = null;
+        const msg = '';
+        app.accountValueChange(acc, error);
+        expect(app.accountErrorMsg).toBe(msg);
+      });
     });
-    it('should set error msg "this is required!" into property "accountError" when enter empty string', () => {
-      const acc = '';
-      const error = { required: true };
-      const msg = 'this is required!';
-      app.accountValueChange(acc, error);
-      expect(app.accountErrorMsg).toBe(msg);
+  });
+
+  describe('Integration Testing', () => {
+    let compiledComponent: HTMLElement;
+    beforeEach(() => {
+      // init component (call ngOninit), or detect componet property change
+      fixture.detectChanges();
+      compiledComponent = fixture.debugElement.nativeElement;
     });
-    it('should set error msg "pattern error!" into property "accountError" when enter invalid string', () => {
-      const acc = 'aaaa1111';
-      const error = {
-        pattern: {
-          actualValue: acc,
-          requiredpattern: '^\\b[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,4}\\b$',
-        },
-      };
-      const msg = 'pattern error!';
-      app.accountValueChange(acc, error);
-      expect(app.accountErrorMsg).toBe(msg);
+
+    describe('Account input field', () => {
+      let accountInputElement: HTMLInputElement;
+      beforeEach(() => {
+        // NOTE: add "!" in the end can tell typescript we certainly get element, impossibly get null
+        accountInputElement = compiledComponent.querySelector('#account')!;
+      });
+      it('should have attribute "type" and its value is "email"', () => {
+        const attributeName = 'type';
+        const attributeValue = 'email';
+        expect(accountInputElement.getAttribute(attributeName)).toBe(attributeValue);
+      });
+      it('should have attribute "name" and its value is "account"', () => {
+        const attributeName = 'name';
+        const attributeValue = 'account';
+        expect(accountInputElement.getAttribute(attributeName)).toBe(attributeValue);
+      });
+      it('should have attribute "pattern" and its value is "\b[w.-]+@[w.-]+.w{2,4}\b"', () => {
+        const attributeName = 'pattern';
+        const attributeValue = '\\b[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,4}\\b';
+        expect(accountInputElement.getAttribute(attributeName)).toBe(attributeValue);
+      });
+      it('should have attribute "required"', () => {
+        const attributeName = 'required';
+        expect(accountInputElement.hasAttribute(attributeName)).toBeTrue();
+      });
+      it('should binding the value of property "account"', () => {
+        const account = 'userInputString';
+
+        app.account = account;
+        fixture.detectChanges();
+
+        // compiled element => <input _ngcontent-ytr-c48="" type="email" name="account" id="account" required="" pattern="\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b" ng-reflect-required="" ng-reflect-pattern="\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b" ng-reflect-name="account" ng-reflect-model="123" class="ng-untouched ng-pristine ng-invalid">
+        expect(accountInputElement.getAttribute('ng-reflect-model')).toBe(account);
+      });
+      it('should trigger function "accountValueChange" when value is being changed', () => {
+        // spyOn : 這個函式的用意是，它會把該物件裡我們所指定的函式替換成一個叫做 Spy 的物件，讓後續如果有人執行該函式時，實際執行的會是我們替換掉的 Spy 物件，而不是原本我們寫的那個函式，這樣才能在後續去驗證該函式是否已經被呼叫過，甚至還可以知道被呼叫的次數、被呼叫時所傳入的參數等等。這個方式是大家在寫測試時所慣用的手法。在這個測試案例裡，我們只在意該函式是不是有被觸發，不在意該函式的實際執行結果，因為該函式的實際執行結果已經在寫單元測試的時候驗證過了，而整合測試的部份所在意的是互動行為。
+        // Reference => https://jasmine.github.io/api/edge/global.html#spyOn
+        spyOn(app, 'accountValueChange');
+        // generated by Angular syntax, using viewChild to get object
+        const accNgModel = app.accNgModelRef;
+
+        accountInputElement.value = 'userInputString';
+        accountInputElement.dispatchEvent(new Event('ngModelChange'));
+
+        // only know function has been called
+        // expect(app.accountValueChange).toHaveBeenCalled();
+
+        // can know function has been called and pass correct number of params
+        expect(app.accountValueChange).toHaveBeenCalledWith(
+          accNgModel.value,
+          accNgModel.errors,
+        );
+      });
     });
-    it('should set error msg "" into property "accountError" when enter correct string', () => {
-      const acc = 'aaaa1111@bbb.com';
-      const error = null;
-      const msg = '';
-      app.accountValueChange(acc, error);
-      expect(app.accountErrorMsg).toBe(msg);
+
+    describe('Error Message!!!', () => {
+      it('should binding error msg "account error" in property "accountErrorMsg" in template', () => {
+        const msg = 'account error';
+        const targetElement = compiledComponent.querySelector('#acc-wrap .error-msg');
+
+        app.accountErrorMsg = msg;
+        fixture.detectChanges();
+
+        expect(targetElement?.textContent).toBe(msg);
+      });
+      it('should binding error msg "pwd error" in property "pwdErrorMsg" in template', () => {
+        const msg = 'pwd error';
+        const targetElement = compiledComponent.querySelector('#pwd-wrap .error-msg')!;
+
+        app.pwdErrorMsg = msg;
+        fixture.detectChanges();
+
+        expect(targetElement.textContent).toBe(msg);
+      });
+    });
+
+    describe('Login Button', () => {
+      let buttonElement: HTMLButtonElement;
+
+      beforeEach(() => {
+        buttonElement = compiledComponent.getElementsByTagName('button')[0];
+      });
+
+      it('should have attribute "type" and its value is "submit"', () => {
+        const attributeName = 'type';
+        const attributeValue = 'submit';
+
+        expect(buttonElement.getAttribute(attributeName)).toBe(attributeValue);
+      });
+
+      // NOTE: the component rendered by Angular CLI has bug, validators in template-driven forms are not triggered when Karma tests are run
+      xit('should have attribute "disabled" when form\'s status is invalid by default', () => {
+        const attributeName = 'disabled';
+        // const acc = '789';
+        // const pwd = '456';
+
+        // app.account = acc;
+        // app.pwd = pwd;
+        // fixture.detectChanges();
+
+        expect(buttonElement.hasAttribute(attributeName)).toBeTrue();
+      });
+
+      describe("when form's status is valid", () => {
+        beforeEach(() => {
+          const acc = 'abc@123.com';
+          const pwd = '123456789';
+
+          app.account = acc;
+          app.pwd = pwd;
+          fixture.detectChanges();
+        });
+
+        it('should not have attribute "disabled"', () => {
+          const attributeName = 'diasbled';
+
+          expect(buttonElement.hasAttribute(attributeName)).toBeFalse();
+        });
+
+        it('should trigger function "log" when click the button', () => {
+          spyOn(app, 'log');
+
+          buttonElement.click();
+
+          expect(app.log).toHaveBeenCalled();
+        });
+      });
     });
   });
 });

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { ValidationErrors } from '@angular/forms';
+import { Component, ViewChild } from '@angular/core';
+import { NgModel, ValidationErrors } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +11,13 @@ export class AppComponent {
   pwd = 'abc';
   accountErrorMsg = '';
   pwdErrorMsg = '';
+
+  @ViewChild('accModel') accNgModelRef!: NgModel;
+
+  ngOnInit(): void {
+    // console.trace('AppComponent Init');
+    console.count('AppComponent Init');
+  }
 
   accountValueChange(acc: string, error: ValidationErrors | null) {
     this.account = acc;
