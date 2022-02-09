@@ -1,17 +1,17 @@
 <form [formGroup]="formGroup" (ngSubmit)="log(formGroup)">
   <p>
     <label for="account">帳號：</label>
-    <input type="email" name="account" id="account" formControlName="acc" />
+    <input type="email" id="account" [formControlName]="'acc'" />
     <br />
     <span class="error-msg">{{ getErrorMsg(getControl('acc')) }}</span>
   </p>
   <p>
     <label for="password">密碼：</label>
-    <input type="password" name="password" id="password" formControlName="pwd" />
+    <input type="password" id="password" formControlName="pwd" />
     <br />
     <span class="error-msg">{{ getErrorMsg(getControl('pwd')) }}</span>
   </p>
   <p>
-    <button type="submit">登入</button>
+    <button type="submit" [disabled]="formGroup.invalid">登入</button>
   </p>
 </form>
